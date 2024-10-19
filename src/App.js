@@ -1,23 +1,19 @@
-import logo from './logo.svg';
+import { Segment } from 'semantic-ui-react';
 import './App.css';
+import FormCliente from './views/client/FormCliente';
 
 function App() {
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      
+      <FormCliente/>
+
+      <div style={{marginTop: '6%'}}>
+        <Segment vertical color='grey' size='tiny' textAlign='center'>
+          &copy; 2023 - Projeto WEB III - IFPE Jaboatão dos Guararapes
+        </Segment>
+      </div>
+
     </div>
   );
 }
