@@ -1,9 +1,34 @@
+import axios from "axios";
 import React from "react";
 import InputMask from 'react-input-mask';
 import { Button, Container, Divider, Form, Icon } from 'semantic-ui-react';
 
 export default function FormCliente () {
-
+    const [nome, setNome] = React.useState('');
+    const [cpf, setCpf] = React.useState('');
+    const [foneCelular, setFoneCelular] = React.useState('');
+    const [foneFixo, setFoneFixo] = React.useState('');
+    const [dataNascimento, setDataNascimento] = React.useState('');
+    const salvarCliente = () => {
+        console.log('Nome: ', nome);
+        console.log('CPF: ', cpf);
+        console.log('Fone Celular: ', foneCelular);
+        console.log('Fone Fixo: ', foneFixo);
+        console.log('Data Nascimento: ', dataNascimento);
+        let clienteRequest = {
+            nome: nome,
+            cpf: cpf,
+            foneCelular: foneCelular,
+            foneFixo: foneFixo,
+            dataNascimento: dataNascimento
+        }
+        axios.post("http://localhost:8080/api/cliente", clienteRequest)
+        .then((response) => {
+            console.log(response.data);
+        }).catch((error) => {
+            console.log(error);
+        });
+    }
     return (
 
         <div>
@@ -27,6 +52,7 @@ export default function FormCliente () {
                                     fluid
                                     label='Nome'
                                     maxLength="100"
+                                    onChange={(e) => setNome(e.target.value)}
                                 />
 
                                 <Form.Input
@@ -36,6 +62,7 @@ export default function FormCliente () {
                                     <InputMask
                                         required
                                         mask="999.999.999-99"
+                                        onChange={(e) => setCpf(e.target.value)}
                                     /> 
                                 </Form.Input>
 
@@ -49,6 +76,7 @@ export default function FormCliente () {
                                     width={6}>
                                     <InputMask 
                                         mask="(99) 9999.9999"
+                                        onChange={(e) => setFoneCelular(e.target.value)}
                                     /> 
                                 </Form.Input>
 
@@ -58,6 +86,7 @@ export default function FormCliente () {
                                     width={6}>
                                     <InputMask 
                                         mask="(99) 9999.9999"
+                                        onChange={(e) => setFoneFixo(e.target.value)}
                                     /> 
                                 </Form.Input>
 
@@ -70,6 +99,7 @@ export default function FormCliente () {
                                         mask="99/99/9999" 
                                         maskChar={null}
                                         placeholder="Ex: 20/03/1985"
+                                        onChange={(e) => setDataNascimento(e.target.value)}
                                     /> 
                                 </Form.Input>
 
@@ -92,6 +122,7 @@ export default function FormCliente () {
                             </Button>
                                 
                             <Button
+                                onClick={salvarCliente}
                                 inverted
                                 circular
                                 icon
