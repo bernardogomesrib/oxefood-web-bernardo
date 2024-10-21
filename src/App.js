@@ -1,16 +1,17 @@
 import { Segment } from 'semantic-ui-react';
 import './App.css';
-import FormCliente from './views/client/FormCliente';
+import FormEntregador from './views/entregador/FormEntregador';
+//import FormCliente from './views/client/FormCliente';
 
 function App() {
   return (
     <div className="App">
       
-      <FormCliente/>
+      <FormEntregador/>
 
       <div style={{marginTop: '6%'}}>
         <Segment vertical color='grey' size='tiny' textAlign='center'>
-          &copy; 2023 - Projeto WEB III - IFPE Jaboatão dos Guararapes
+          &copy; 2024 - Projeto WEB III - IFPE Jaboatão dos Guararapes
         </Segment>
       </div>
 
