@@ -1,9 +1,11 @@
 import React from "react";
 import { Container, Grid, Image } from "semantic-ui-react";
+import MenuSistema from "../../MenuSistema";
 
 export default function Home() {
   return (
     <div>
+      <MenuSistema  tela="home" />
       <div style={{ marginTop: "5%" }}>
         <Container>
           <Grid columns={2} divided>

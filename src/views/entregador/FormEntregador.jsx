@@ -2,6 +2,7 @@ import axios from "axios";
 import React from "react";
 import InputMask from "react-input-mask";
 import { Button, Container, Divider, Form, Icon } from "semantic-ui-react";
+import MenuSistema from "../../MenuSistema";
 
 export default function FormEntregador() {
   const options = [
@@ -58,14 +59,14 @@ export default function FormEntregador() {
       dataNascimento: dataNascimento,
       foneCelular: foneCelular,
       foneFixo: foneFixo,
-      qtdEntregas: qtdEntregas,
+      qtdEntregasRealizadas: qtdEntregas,
       valorFrete: valorFrete,
-      rua: rua,
-      numero: numero,
-      bairro: bairro,
-      cidade: cidade,
-      cep: cep,
-      uf: uf,
+      enderecoRua: rua,
+      enderecoNumero: numero,
+      enderecoBairro: bairro,
+      enderecoCidade: cidade,
+      enderecoCep: cep,
+      enderecoUf: uf,
       complemento: complemento,
     };
     axios
@@ -79,6 +80,7 @@ export default function FormEntregador() {
   };
   return (
     <div>
+      <MenuSistema tela="entregador" />
       <div style={{ marginTop: "3%" }}>
         <Container textAlign="justified">
           <h2>

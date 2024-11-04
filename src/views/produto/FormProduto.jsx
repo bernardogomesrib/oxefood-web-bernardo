@@ -1,6 +1,7 @@
 import axios from "axios";
 import React from "react";
 import { Button, Container, Divider, Form, Icon } from "semantic-ui-react";
+import MenuSistema from "../../MenuSistema";
 
 export default function FormProduto() {
   const [titulo, setTitulo] = React.useState("");
@@ -19,6 +20,7 @@ export default function FormProduto() {
         tempoEntregaMinimo:tempoEntregaMinimo,
         tempoEntregaMaximo:tempoEntregaMaximo
     };
+    console.log(produtoRequest)
     axios
       .post("http://localhost:8080/api/produto", produtoRequest)
       .then((response) => {
@@ -30,6 +32,7 @@ export default function FormProduto() {
   };
 return (
     <div>
+        <MenuSistema tela="produto" />
         <div style={{ marginTop: "3%" }}>
             <Container textAlign="justified">
                 <h2>
