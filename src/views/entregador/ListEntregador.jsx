@@ -1,15 +1,44 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Button, Container, Divider, Icon, Table } from "semantic-ui-react";
+import { Button, Container, Divider, Header, Icon, Modal, Table } from "semantic-ui-react";
 import MenuSistema from "../../MenuSistema";
 
 export default function ListEntregador() {
   const [lista, setLista] = useState([]);
-
   useEffect(() => {
     carregarLista();
   }, []);
+
+  const [openModal, setOpenModal] = useState(false);
+  const [idRemover, setIdRemover] = useState();
+  const [entregador,setEntregador]= useState();
+  const [modelVer,setModelVer]= useState(false);
+  function confirmaVer(Entregador){
+      setModelVer(true);
+      setEntregador(Entregador);
+  }
+
+  async function remover() {
+    await axios
+      .delete("http://localhost:8080/api/entregador/" + idRemover)
+      .then((response) => {
+        console.log("Cliente removido com sucesso.");
+
+        axios.get("http://localhost:8080/api/entregador").then((response) => {
+          setLista(response.data);
+        });
+      })
+      .catch((error) => {
+        console.log("Erro ao remover um cliente.");
+      });
+    setOpenModal(false);
+  }
+
+  function confirmaRemover(id) {
+    setOpenModal(true);
+    setIdRemover(id);
+  }
 
   function carregarLista() {
     axios.get("http://localhost:8080/api/entregador").then((response) => {
@@ -54,7 +83,6 @@ export default function ListEntregador() {
             <Table color="orange" sortable celled>
               <Table.Header>
                 <Table.Row>
-                  
                   <Table.HeaderCell>Nome</Table.HeaderCell>
                   <Table.HeaderCell>CPF</Table.HeaderCell>
                   <Table.HeaderCell>RG</Table.HeaderCell>
@@ -79,22 +107,35 @@ export default function ListEntregador() {
                     <Table.Cell>{Entregador.qtdEntregasRealizadas}</Table.Cell>
                     <Table.Cell>{Entregador.valorFrete}</Table.Cell>
                     <Table.Cell textAlign="center">
-                    <Button
-                        inverted
-                        circular
-                        color="green"
-                        title="Clique aqui para editar os dados deste entregador"
-                        icon
+                      <Link
+                        to="/form-entregador"
+                        state={{ id: Entregador.id }}
+                        style={{ color: "green" }}
+                        asChild
                       >
-                        <Link
-                          to="/form-entregador"
-                          state={{ id: Entregador.id }}
-                          style={{ color: "green" }}
+                        <Button
+                          inverted
+                          circular
+                          color="green"
+                          title="Clique aqui para editar os dados deste entregador"
+                          icon
                         >
                           {" "}
                           <Icon name="edit" />{" "}
-                        </Link>
-                      </Button>{" "}
+                        </Button>{" "}
+                      </Link>
+                      &nbsp;
+                      <Button
+                        inverted
+                        circular
+                        color="orange"
+                        title="Clique aqui para visualizar este Entregador"
+                        icon
+                        onClick={(e) => confirmaVer(Entregador)}
+                      >
+                        
+                        <Icon name="eye" />
+                      </Button>
                       &nbsp;
                       <Button
                         inverted
@@ -102,7 +143,9 @@ export default function ListEntregador() {
                         color="red"
                         title="Clique aqui para remover este Entregador"
                         icon
+                        onClick={(e) => confirmaRemover(Entregador.id)}
                       >
+                        
                         <Icon name="trash" />
                       </Button>
                     </Table.Cell>
@@ -113,6 +156,80 @@ export default function ListEntregador() {
           </div>
         </Container>
       </div>
+      <Modal
+        basic
+        onClose={() => setOpenModal(false)}
+        onOpen={() => setOpenModal(true)}
+        open={openModal}
+      >
+        <Header icon>
+          <Icon name="trash" />
+          <div style={{ marginTop: "5%" }}>
+            {" "}
+            Tem certeza que deseja remover esse registro?{" "}
+          </div>
+        </Header>
+        <Modal.Actions>
+          <Button
+            basic
+            color="red"
+            inverted
+            onClick={() => setOpenModal(false)}
+          >
+            <Icon name="remove" /> Não
+          </Button>
+          <Button color="green" inverted onClick={() => remover()}>
+            <Icon name="checkmark" /> Sim
+          </Button>
+        </Modal.Actions>
+      </Modal>
+
+
+      <Modal
+        basic
+        onClose={() => setModelVer(false)}
+        onOpen={() => setModelVer(true)}
+        open={modelVer}
+      >
+        <Header icon>
+          
+          <div style={{ marginTop: "5%"}}>
+            {" "}
+                
+                Entregador
+                
+            {" "}
+          </div>
+        </Header>
+        <div style={{display:'flex',flexDirection:'column',backgroundColor:'white',color:'black'}}>
+                <p style={{marginBottom:3}}><strong>Nome: </strong>{entregador?.nome}</p>
+                <p style={{marginBottom:3}}><strong>Ativo: </strong>{(entregador?.ativo?"Sim":"Não") }</p>
+                <p style={{marginBottom:3}}><strong>CPF: </strong>{entregador?.cpf }</p>
+                <p style={{marginBottom:3}}><strong>RG: </strong>{entregador?.rg }</p>
+                <p style={{marginBottom:3}}><strong>Data de Nascimento: </strong>{entregador?.dataNascimento }</p>
+                <p style={{marginBottom:3}}><strong>Fone Celular: </strong>{entregador?.foneCelular }</p>
+                <p style={{marginBottom:3}}><strong>Fone Fixo: </strong>{entregador?.foneFixo }</p>
+                <p style={{marginBottom:3}}><strong>QTD Entregas Realizadas: </strong>{entregador?.qtdEntregasRealizadas }</p>
+                <p style={{marginBottom:3}}><strong>Valor Frete: </strong>{entregador?.valorFrete }</p>
+                <p style={{marginBottom:3}}><strong>Endereço Rua: </strong>{entregador?.enderecoRua }</p>
+                <p style={{marginBottom:3}}><strong>Endereço Número: </strong>{entregador?.enderecoNumero }</p>
+                <p style={{marginBottom:3}}><strong>Endereço Bairro: </strong>{entregador?.enderecoBairro }</p>
+                <p style={{marginBottom:3}}><strong>Endereço Cidade: </strong>{entregador?.enderecoCidade }</p>
+                <p style={{marginBottom:3}}><strong>Endereço CEP: </strong>{entregador?.enderecoCep }</p>
+                <p style={{marginBottom:3}}><strong>Endereço UF: </strong>{entregador?.enderecoUf }</p>
+                <p style={{marginBottom:3}}><strong>Complemento: </strong>{entregador?.complemento}</p>
+        </div>
+        <Modal.Actions>
+        
+          <Button color="green" inverted onClick={() => setModelVer(false)}>
+            <Icon name="remove" /> Fechar
+          </Button>
+        </Modal.Actions>
+      </Modal>
+
+
+
+
     </div>
   );
 }
