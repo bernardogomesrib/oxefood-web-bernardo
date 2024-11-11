@@ -44,18 +44,7 @@ export default function ListProduto() {
       setLista(response.data);
     });
   }
-  /* function formatarData(dataParam) {
-    if (dataParam === null || dataParam === "" || dataParam === undefined) {
-      return "";
-    }
-    if (dataParam.includes("-")) {
-      let arrayData = dataParam.split("-");
-
-      return arrayData[2] + "/" + arrayData[1] + "/" + arrayData[0];
-    } else {
-      return dataParam;
-    }
-  } */
+  
   return (
     <div>
       <MenuSistema tela={"Produtos"} />

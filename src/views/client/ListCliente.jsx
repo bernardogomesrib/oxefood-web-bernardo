@@ -1,37 +1,47 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Button, Container, Divider, Header, Icon, Modal, Table } from "semantic-ui-react";
+import {
+  Button,
+  Container,
+  Divider,
+  Header,
+  Icon,
+  Modal,
+  Table,
+} from "semantic-ui-react";
 import MenuSistema from "../../MenuSistema";
 
 export default function ListCliente() {
   const [lista, setLista] = useState([]);
-  const [openModal,setOpenModal]= useState(false);
-  const [idRemover,setIdRemover] = useState();
-
+  const [openModal, setOpenModal] = useState(false);
+  const [idRemover, setIdRemover] = useState();
+  const [Cliente, setCliente] = useState();
+  const [modelVer, setModelVer] = useState(false);
+  function confirmaVer(Cliente) {
+    setModelVer(true);
+    setCliente(Cliente);
+  }
   async function remover() {
+    await axios
+      .delete("http://localhost:8080/api/cliente/" + idRemover)
+      .then((response) => {
+        console.log("Cliente removido com sucesso.");
 
-    await axios.delete('http://localhost:8080/api/cliente/' + idRemover)
-    .then((response) => {
-
-        console.log('Cliente removido com sucesso.')
-
-        axios.get("http://localhost:8080/api/cliente")
-        .then((response) => {
-            setLista(response.data)
-        })
-    })
-    .catch((error) => {
-        console.log('Erro ao remover um cliente.')
-    })
-    setOpenModal(false)
-}
-
+        axios.get("http://localhost:8080/api/cliente").then((response) => {
+          setLista(response.data);
+        });
+      })
+      .catch((error) => {
+        console.log("Erro ao remover um cliente.");
+      });
+    setOpenModal(false);
+  }
 
   function confirmaRemover(id) {
-    setOpenModal(true)
-    setIdRemover(id)
-}
+    setOpenModal(true);
+    setIdRemover(id);
+  }
 
   useEffect(() => {
     carregarLista();
@@ -106,17 +116,28 @@ export default function ListCliente() {
                         style={{ color: "green" }}
                         asChild
                       >
+                        <Button
+                          inverted
+                          circular
+                          color="green"
+                          title="Clique aqui para editar os dados deste cliente"
+                          icon
+                        >
+                          {" "}
+                          <Icon name="edit" />{" "}
+                        </Button>{" "}
+                      </Link>
+                      &nbsp;
                       <Button
                         inverted
                         circular
-                        color="green"
-                        title="Clique aqui para editar os dados deste cliente"
+                        color="orange"
+                        title="Clique aqui para visualizar este Cliente"
                         icon
+                        onClick={(e) => confirmaVer(cliente)}
                       >
-                          {" "}
-                          <Icon name="edit" />{" "}
-                      </Button>{" "}
-                        </Link>
+                        <Icon name="eye" />
+                      </Button>
                       &nbsp;
                       <Button
                         inverted
@@ -124,8 +145,8 @@ export default function ListCliente() {
                         color="red"
                         title="Clique aqui para remover este cliente"
                         icon
-                        onClick={e => confirmaRemover(cliente.id)}>
-
+                        onClick={(e) => confirmaRemover(cliente.id)}
+                      >
                         <Icon name="trash" />
                       </Button>
                     </Table.Cell>
@@ -137,25 +158,77 @@ export default function ListCliente() {
         </Container>
       </div>
       <Modal
-               basic
-               onClose={() => setOpenModal(false)}
-               onOpen={() => setOpenModal(true)}
-               open={openModal}
-         >
-               <Header icon>
-                   <Icon name='trash' />
-                   <div style={{marginTop: '5%'}}> Tem certeza que deseja remover esse registro? </div>
-               </Header>
-               <Modal.Actions>
-                   <Button basic color='red' inverted onClick={() => setOpenModal(false)}>
-                       <Icon name='remove' /> Não
-                   </Button>
-                   <Button color='green' inverted onClick={() => remover()}>
-                       <Icon name='checkmark' /> Sim
-                   </Button>
-               </Modal.Actions>
-         </Modal>
+        basic
+        onClose={() => setOpenModal(false)}
+        onOpen={() => setOpenModal(true)}
+        open={openModal}
+      >
+        <Header icon>
+          <Icon name="trash" />
+          <div style={{ marginTop: "5%" }}>
+            {" "}
+            Tem certeza que deseja remover esse registro?{" "}
+          </div>
+        </Header>
+        <Modal.Actions>
+          <Button
+            basic
+            color="red"
+            inverted
+            onClick={() => setOpenModal(false)}
+          >
+            <Icon name="remove" /> Não
+          </Button>
+          <Button color="green" inverted onClick={() => remover()}>
+            <Icon name="checkmark" /> Sim
+          </Button>
+        </Modal.Actions>
+      </Modal>
 
+      <Modal
+        basic
+        onClose={() => setModelVer(false)}
+        onOpen={() => setModelVer(true)}
+        open={modelVer}
+      >
+        <Header icon>
+          <div style={{ marginTop: "5%" }}> Cliente </div>
+        </Header>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            backgroundColor: "white",
+            color: "black",
+          }}
+        >
+          <p style={{ marginBottom: 3 }}>
+            <strong>Nome: </strong>
+            {Cliente?.nome}
+          </p>
+          <p style={{ marginBottom: 3 }}>
+            <strong>CPF: </strong>
+            {Cliente?.cpf}
+          </p>
+          <p style={{ marginBottom: 3 }}>
+            <strong>Data de Nascimento: </strong>
+            {Cliente?.dataNascimento}
+          </p>
+          <p style={{ marginBottom: 3 }}>
+            <strong>Fone Celular: </strong>
+            {Cliente?.foneCelular}
+          </p>
+          <p style={{ marginBottom: 3 }}>
+            <strong>Fone Fixo: </strong>
+            {Cliente?.foneFixo}
+          </p>
+        </div>
+        <Modal.Actions>
+          <Button color="green" inverted onClick={() => setModelVer(false)}>
+            <Icon name="remove" /> Fechar
+          </Button>
+        </Modal.Actions>
+      </Modal>
     </div>
   );
 }
