@@ -1,6 +1,7 @@
 import axios from "axios";
 import React from "react";
 import InputMask from "react-input-mask";
+import { useLocation } from "react-router-dom";
 import { Button, Container, Divider, Form, Icon } from "semantic-ui-react";
 import MenuSistema from "../../MenuSistema";
 
@@ -10,6 +11,25 @@ export default function FormCliente() {
   const [foneCelular, setFoneCelular] = React.useState("");
   const [foneFixo, setFoneFixo] = React.useState("");
   const [dataNascimento, setDataNascimento] = React.useState("");
+  const { state } = useLocation();
+  const [idCliente, setIdCliente] = React.useState();
+  
+  
+  React.useEffect(() => {
+    if (state != null && state.id != null) {
+      axios
+        .get("http://localhost:8080/api/cliente/" + state.id)
+        .then((response) => {
+          setIdCliente(response.data.id);
+          setNome(response.data.nome);
+          setCpf(response.data.cpf);
+          setDataNascimento(response.data.dataNascimento);
+          setFoneCelular(response.data.foneCelular);
+          setFoneFixo(response.data.foneFixo);
+        });
+    }
+  }, [state]);
+
   const salvarCliente = () => {
     console.log("Nome: ", nome);
     console.log("CPF: ", cpf);
@@ -23,29 +43,53 @@ export default function FormCliente() {
       foneFixo: foneFixo,
       dataNascimento: dataNascimento,
     };
-    axios
-      .post("http://localhost:8080/api/cliente", clienteRequest)
-      .then((response) => {
-        console.log(response.data);
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+    if (idCliente != null) {
+      axios
+        .put("http://localhost:8080/api/cliente/" + idCliente, clienteRequest)
+        .then((response) => {
+          console.log(response.data);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    } else {
+      axios
+        .post("http://localhost:8080/api/cliente", clienteRequest)
+        .then((response) => {
+          console.log(response.data);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    }
   };
   return (
     <div>
-        <MenuSistema tela="cliente" />
+      <MenuSistema tela="cliente" />
       <div style={{ marginTop: "3%" }}>
         <Container textAlign="justified">
-          <h2>
-            {" "}
-            <span style={{ color: "darkgray" }}>
+          {idCliente === undefined && (
+            <h2>
               {" "}
-              Cliente &nbsp;
-              <Icon name="angle double right" size="small" />{" "}
-            </span>{" "}
-            Cadastro{" "}
-          </h2>
+              <span style={{ color: "darkgray" }}>
+                {" "}
+                Cliente &nbsp;
+                <Icon name="angle double right" size="small" />{" "}
+              </span>{" "}
+              Cadastro
+            </h2>
+          )}
+          {idCliente !== undefined && (
+            <h2>
+              {" "}
+              <span style={{ color: "darkgray" }}>
+                {" "}
+                Cliente &nbsp;
+                <Icon name="angle double right" size="small" />{" "}
+              </span>{" "}
+              Alteração
+            </h2>
+          )}
 
           <Divider />
 
@@ -57,6 +101,7 @@ export default function FormCliente() {
                   fluid
                   label="Nome"
                   maxLength="100"
+                  value={nome}
                   onChange={(e) => setNome(e.target.value)}
                 />
 
@@ -64,6 +109,7 @@ export default function FormCliente() {
                   <InputMask
                     required
                     mask="999.999.999-99"
+                    value={cpf}
                     onChange={(e) => setCpf(e.target.value)}
                   />
                 </Form.Input>
@@ -73,6 +119,7 @@ export default function FormCliente() {
                 <Form.Input fluid label="Fone Celular" width={6}>
                   <InputMask
                     mask="(99) 9999.9999"
+                    value={foneCelular}
                     onChange={(e) => setFoneCelular(e.target.value)}
                   />
                 </Form.Input>
@@ -80,6 +127,7 @@ export default function FormCliente() {
                 <Form.Input fluid label="Fone Fixo" width={6}>
                   <InputMask
                     mask="(99) 9999.9999"
+                    value={foneFixo}
                     onChange={(e) => setFoneFixo(e.target.value)}
                   />
                 </Form.Input>
@@ -87,6 +135,7 @@ export default function FormCliente() {
                 <Form.Input fluid label="Data Nascimento" width={6}>
                   <InputMask
                     mask="99/99/9999"
+                    value={dataNascimento}
                     maskChar={null}
                     placeholder="Ex: 20/03/1985"
                     onChange={(e) => setDataNascimento(e.target.value)}

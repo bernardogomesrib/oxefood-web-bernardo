@@ -79,14 +79,21 @@ export default function ListEntregador() {
                     <Table.Cell>{Entregador.qtdEntregasRealizadas}</Table.Cell>
                     <Table.Cell>{Entregador.valorFrete}</Table.Cell>
                     <Table.Cell textAlign="center">
-                      <Button
+                    <Button
                         inverted
                         circular
                         color="green"
-                        title="Clique aqui para editar os dados deste Entregador"
+                        title="Clique aqui para editar os dados deste entregador"
                         icon
                       >
-                        <Icon name="edit" />
+                        <Link
+                          to="/form-entregador"
+                          state={{ id: Entregador.id }}
+                          style={{ color: "green" }}
+                        >
+                          {" "}
+                          <Icon name="edit" />{" "}
+                        </Link>
                       </Button>{" "}
                       &nbsp;
                       <Button
