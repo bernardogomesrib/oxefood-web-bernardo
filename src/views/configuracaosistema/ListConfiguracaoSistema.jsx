@@ -186,7 +186,7 @@ export default function ListaConfiguracaoSistema() {
           <div style={{ marginTop: "5%"}}>
             {" "}
                 
-                Entregador
+                Empresa
                 
             {" "}
           </div>
