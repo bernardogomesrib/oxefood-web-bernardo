@@ -104,7 +104,7 @@ export default function FormConfiguracaoSistema() {
               {" "}
               <span style={{ color: "darkgray" }}>
                 {" "}
-                Entregador &nbsp;
+                Configuração Sistema &nbsp;
                 <Icon name="angle double right" size="small" />{" "}
               </span>{" "}
               Cadastro{" "}
@@ -145,6 +145,7 @@ export default function FormConfiguracaoSistema() {
 
                 <Form.Input
                   fluid
+                  required
                   label="Tempo mínimo de agendamento de pedidos"
                   width={9}
                   type="number"
@@ -156,6 +157,7 @@ export default function FormConfiguracaoSistema() {
               </Form.Group>
                 <Form.Group><Form.Input
                   fluid
+                  required
                   label="Email"
                   width={16}
                   type="email"
@@ -199,9 +201,12 @@ export default function FormConfiguracaoSistema() {
                 icon
                 labelPosition="left"
                 color="orange"
+                onClick={() => {
+                  window.location.href = "/list-configuracao-sistema";
+                }}
               >
                 <Icon name="reply" />
-                Voltar
+                Listar
               </Button>
 
               <Button

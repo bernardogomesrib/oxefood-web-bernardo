@@ -186,7 +186,7 @@ export default function ListaConfiguracaoSistema() {
           <div style={{ marginTop: "5%"}}>
             {" "}
                 
-                Empresa
+                Configuração do sistema
                 
             {" "}
           </div>
@@ -197,7 +197,7 @@ export default function ListaConfiguracaoSistema() {
                 <p style={{marginBottom:3}}><strong>site </strong>{entregador?.site }</p>
                 <p style={{marginBottom:3}}><strong>email </strong>{entregador?.emailContato }</p>
                 <p style={{marginBottom:3}}><strong>Tempo minimo de agendamento de pedidos </strong>{entregador?.tempoMinimoAgendamentoPedidos }</p>
-                <p style={{marginBottom:3}}><strong>Está aceitando pedidos?</strong>{entregador?.ligarAceitePedidos?"Sim":"Não" }</p>
+                <p style={{marginBottom:3}}><strong>Está aceitando pedidos?  </strong>{entregador?.ligarAceitePedidos?"Sim":"Não" }</p>
                 <p style={{marginBottom:3}}><strong>Data de entrada no sistema</strong>{entregador?.dataEntradaSistema }</p>
         </div>
         <Modal.Actions>
