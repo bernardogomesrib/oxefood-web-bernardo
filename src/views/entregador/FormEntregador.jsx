@@ -4,6 +4,7 @@ import InputMask from "react-input-mask";
 import { useLocation } from "react-router-dom";
 import { Button, Container, Divider, Form, Icon } from "semantic-ui-react";
 import MenuSistema from "../../MenuSistema";
+import { notifyError, notifySuccess } from "../util/util";
 
 export default function FormEntregador() {
   const options = [
@@ -78,7 +79,17 @@ export default function FormEntregador() {
           setUf(response.data.enderecoUf);
           setComplemento(response.data.complemento);
           console.log(response.data);
-        });
+        })
+        .catch((error) => {
+          if(error.response.data.errors!== undefined){
+            error.response.data.errors.forEach((erro) => {
+              notifyError(erro.defaultMessage);
+            });
+          }else{
+            notifyError(error.response.data.message);
+          }
+        })
+        ;
     }
   }, [state]);
 
@@ -111,18 +122,32 @@ export default function FormEntregador() {
         .put("http://localhost:8080/api/entregador/"+entregadorId, entregadorRequest)
         .then((response) => {
           console.log(response.data);
+          notifySuccess("Entregador alterado com sucesso.");
         })
         .catch((error) => {
-          console.log(error);
+          if(error.response.data.errors!== undefined){
+            error.response.data.errors.forEach((erro) => {
+              notifyError(erro.defaultMessage);
+            });
+          }else{
+            notifyError(error.response.data.message);
+          }
         });
     }else{
       axios
         .post("http://localhost:8080/api/entregador", entregadorRequest)
         .then((response) => {
           console.log(response.data);
+          notifySuccess("Entregador cadastrado com sucesso.");
         })
         .catch((error) => {
-          console.log(error);
+          if(error.response.data.errors!== undefined){
+            error.response.data.errors.forEach((erro) => {
+              notifyError(erro.defaultMessage);
+            });
+          }else{
+            notifyError(error.response.data.message);
+          }
         });
 
     }

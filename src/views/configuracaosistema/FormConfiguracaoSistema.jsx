@@ -4,6 +4,7 @@ import InputMask from "react-input-mask";
 import { useLocation } from "react-router-dom";
 import { Button, Container, Divider, Form, Icon } from "semantic-ui-react";
 import MenuSistema from "../../MenuSistema";
+import { notifyError, notifySuccess } from "../util/util";
 
 export default function FormConfiguracaoSistema() {
   const [nomeEmpresa, setNomeEmpresa] = React.useState();
@@ -58,10 +59,16 @@ export default function FormConfiguracaoSistema() {
         )
         .then((response) => {
           console.log(response.data);
-          alert("Configuração de sistema alterada com sucesso.");
+          notifySuccess("Empresa alterada com sucesso.");
         })
         .catch((error) => {
-          console.log(error);
+          if(error.response.data.errors!== undefined){
+            error.response.data.errors.forEach((erro) => {
+              notifyError(erro.defaultMessage);
+            });
+          }else{
+            notifyError(error.response.data.message);
+          }
         });
     } else {
       axios
@@ -71,7 +78,7 @@ export default function FormConfiguracaoSistema() {
         )
         .then((response) => {
           console.log(response.data);
-          alert("Configuração de sistema salva com sucesso.");
+          notifySuccess("Configuração de sistema cadastrada com sucesso.");
           setCnpj("");
           setNomeEmpresa("");
           setSite("");
@@ -80,13 +87,19 @@ export default function FormConfiguracaoSistema() {
           setLigarAceitePedidos(true);
         })
         .catch((error) => {
-          console.log(error);
-        });
+          if(error.response.data.errors!== undefined){
+            error.response.data.errors.forEach((erro) => {
+              notifyError(erro.defaultMessage);
+            });
+          }else{
+            notifyError(error.response.data.message);
+          }
+        })
     }
   };
   return (
     <div>
-      <MenuSistema tela="Configuração Sistema" />
+      <MenuSistema tela="Empresa" />
       <div style={{ marginTop: "3%" }}>
         <Container textAlign="justified">
           {configuracaoSistemaId ? (
@@ -94,7 +107,7 @@ export default function FormConfiguracaoSistema() {
               {" "}
               <span style={{ color: "darkgray" }}>
                 {" "}
-                Configuração Sistema &nbsp;
+                Empresa &nbsp;
                 <Icon name="angle double right" size="small" />{" "}
               </span>{" "}
               Alteração{" "}
@@ -104,7 +117,7 @@ export default function FormConfiguracaoSistema() {
               {" "}
               <span style={{ color: "darkgray" }}>
                 {" "}
-                Configuração Sistema &nbsp;
+                Empresa &nbsp;
                 <Icon name="angle double right" size="small" />{" "}
               </span>{" "}
               Cadastro{" "}
@@ -202,7 +215,7 @@ export default function FormConfiguracaoSistema() {
                 labelPosition="left"
                 color="orange"
                 onClick={() => {
-                  window.location.href = "/list-configuracao-sistema";
+                  window.location.href = "/list-empresa";
                 }}
               >
                 <Icon name="reply" />

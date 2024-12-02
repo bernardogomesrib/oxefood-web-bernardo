@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Button, Container, Divider, Header, Icon, Modal, Table } from "semantic-ui-react";
 import MenuSistema from "../../MenuSistema";
+import { notifyError, notifySuccess } from "../util/util";
 
 export default function ListaConfiguracaoSistema() {
   const [lista, setLista] = useState([]);
@@ -24,14 +25,28 @@ export default function ListaConfiguracaoSistema() {
       .delete("http://localhost:8080/api/configuracao-sistema/" + idRemover)
       .then((response) => {
         console.log("configuração de sistema removido com sucesso.");
-
+        notifySuccess("configuração de sistema removido com sucesso.");
         axios.get("http://localhost:8080/api/configuracao-sistema").then((response) => {
           setLista(response.data);
+        }).catch((error) => {
+          if(error.response.data.errors!== undefined){
+            error.response.data.errors.forEach((erro) => {
+              notifyError(erro.defaultMessage);
+            });
+          }else{
+            notifyError(error.response.data.message);
+          }
         });
-      })
-      .catch((error) => {
-        console.log("Erro ao remover uma configuração de sistema.");
+      }).catch((error) => {
+        if(error.response.data.errors!== undefined){
+          error.response.data.errors.forEach((erro) => {
+            notifyError(erro.defaultMessage);
+          });
+        }else{
+          notifyError(error.response.data.message);
+        }
       });
+      
     setOpenModal(false);
   }
 
@@ -43,6 +58,14 @@ export default function ListaConfiguracaoSistema() {
   function carregarLista() {
     axios.get("http://localhost:8080/api/configuracao-sistema").then((response) => {
       setLista(response.data);
+    }).catch((error) => {
+      if(error.response.data.errors!== undefined){
+        error.response.data.errors.forEach((erro) => {
+          notifyError(erro.defaultMessage);
+        });
+      }else{
+        notifyError(error.response.data.message);
+      }
     });
   }
   /* function formatarData(dataParam) {
@@ -62,7 +85,7 @@ export default function ListaConfiguracaoSistema() {
       <MenuSistema tela={"ListaConfiguraçãoSistema"} />
       <div style={{ marginTop: "3%" }}>
         <Container textAlign="justified">
-          <h2> Configuração do sistema </h2>
+          <h2> Empresas </h2>
           <Divider />
 
           <div style={{ marginTop: "4%" }}>
@@ -73,7 +96,7 @@ export default function ListaConfiguracaoSistema() {
               icon="clipboard outline"
               floated="right"
               as={Link}
-              to="/form-configuracao-sistema"
+              to="/form-empresa"
             />
 
             <br />

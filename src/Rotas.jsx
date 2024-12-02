@@ -16,11 +16,11 @@ function Rotas() {
       <Route path="form-cliente" element={<FormCliente />} />
       <Route path="form-produto" element={<FormProduto />} />
       <Route path="form-entregador" element={<FormEntregador />} />
-      <Route path="form-configuracao-sistema" element={<FormConfiguracaoSistema />} />
+      <Route path="form-empresa" element={<FormConfiguracaoSistema />} />
       <Route path="list-cliente" element={ <ListCliente/> } />
       <Route path="list-produto" element={ <ListProduto/> } />
       <Route path="list-entregador" element={ <ListEntregador/> } />
-      <Route path="list-configuracao-sistema" element={ <ListaConfiguracaoSistema/> } />
+      <Route path="list-empresa" element={ <ListaConfiguracaoSistema/> } />
       
     </Routes>
   );

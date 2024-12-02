@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Button, Container, Divider, Header, Icon, Modal, Table } from "semantic-ui-react";
 import MenuSistema from "../../MenuSistema";
+import { notifyError, notifySuccess } from "../util/util";
 
 export default function ListEntregador() {
   const [lista, setLista] = useState([]);
@@ -23,15 +24,21 @@ export default function ListEntregador() {
     await axios
       .delete("http://localhost:8080/api/entregador/" + idRemover)
       .then((response) => {
-        console.log("Cliente removido com sucesso.");
-
+        console.log("Entregador removido com sucesso.");
+        notifySuccess("Entregador removido com sucesso.");
         axios.get("http://localhost:8080/api/entregador").then((response) => {
           setLista(response.data);
         });
       })
       .catch((error) => {
-        console.log("Erro ao remover um cliente.");
-      });
+        if(error.response.data.errors!== undefined){
+          error.response.data.errors.forEach((erro) => {
+            notifyError(erro.defaultMessage);
+          });
+        }else{
+          notifyError(error.response.data.message);
+        }
+      })
     setOpenModal(false);
   }
 
@@ -43,6 +50,14 @@ export default function ListEntregador() {
   function carregarLista() {
     axios.get("http://localhost:8080/api/entregador").then((response) => {
       setLista(response.data);
+    }).catch((error) => {
+      if(error.response.data.errors!== undefined){
+        error.response.data.errors.forEach((erro) => {
+          notifyError(erro.defaultMessage);
+        });
+      }else{
+        notifyError(error.response.data.message);
+      }
     });
   }
   /* function formatarData(dataParam) {

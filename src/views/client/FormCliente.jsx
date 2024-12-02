@@ -4,6 +4,7 @@ import InputMask from "react-input-mask";
 import { useLocation } from "react-router-dom";
 import { Button, Container, Divider, Form, Icon } from "semantic-ui-react";
 import MenuSistema from "../../MenuSistema";
+import { notifyError, notifySuccess } from "../util/util";
 
 export default function FormCliente() {
   const [nome, setNome] = React.useState("");
@@ -13,7 +14,7 @@ export default function FormCliente() {
   const [dataNascimento, setDataNascimento] = React.useState("");
   const { state } = useLocation();
   const [idCliente, setIdCliente] = React.useState();
-  
+  //const [error, setError] = React.useState();
   
   React.useEffect(() => {
     if (state != null && state.id != null) {
@@ -26,6 +27,15 @@ export default function FormCliente() {
           setDataNascimento(response.data.dataNascimento);
           setFoneCelular(response.data.foneCelular);
           setFoneFixo(response.data.foneFixo);
+        })
+        .catch((error) => {
+          if(error.response.data.errors!== undefined){
+            error.response.data.errors.forEach((erro) => {
+              notifyError(erro.defaultMessage);
+            });
+          }else{
+            notifyError(error.response.data.message);
+          }
         });
     }
   }, [state]);
@@ -48,18 +58,38 @@ export default function FormCliente() {
         .put("http://localhost:8080/api/cliente/" + idCliente, clienteRequest)
         .then((response) => {
           console.log(response.data);
+          notifySuccess("Cliente alterado com sucesso!");
         })
         .catch((error) => {
-          console.log(error);
+          if(error.response.data.errors!== undefined){
+            error.response.data.errors.forEach((erro) => {
+              notifyError(erro.defaultMessage);
+            });
+          }else{
+            notifyError(error.response.data.message);
+          }
         });
     } else {
       axios
         .post("http://localhost:8080/api/cliente", clienteRequest)
         .then((response) => {
           console.log(response.data);
+          notifySuccess("Cliente cadastrado com sucesso!");
+          setNome("");
+          setCpf("");
+          setFoneCelular("");
+          setFoneFixo("");
+          setDataNascimento("");
         })
         .catch((error) => {
           console.log(error);
+          if(error.response.data.errors!== undefined){
+            error.response.data.errors.forEach((erro) => {
+              notifyError(erro.defaultMessage);
+            });
+          }else{
+            notifyError(error.response.data.message);
+          }
         });
     }
   };
@@ -152,9 +182,10 @@ export default function FormCliente() {
                 icon
                 labelPosition="left"
                 color="orange"
+                onClick={() => window.location.href="/list-cliente"}
               >
                 <Icon name="reply" />
-                Voltar
+                Listar
               </Button>
 
               <Button

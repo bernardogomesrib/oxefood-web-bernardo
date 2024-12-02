@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Button, Container, Divider, Header, Icon, Modal, Table } from "semantic-ui-react";
 import MenuSistema from "../../MenuSistema";
+import { notifyError, notifySuccess } from "../util/util";
 
 export default function ListProduto() {
   const [lista, setLista] = useState([]);
@@ -24,6 +25,7 @@ export default function ListProduto() {
       .delete("http://localhost:8080/api/produto/" + idRemover)
       .then((response) => {
         console.log("Cliente removido com sucesso.");
+        notifySuccess("Produto removido com sucesso.");
 
         axios.get("http://localhost:8080/api/produto").then((response) => {
           setLista(response.data);
@@ -31,6 +33,13 @@ export default function ListProduto() {
       })
       .catch((error) => {
         console.log("Erro ao remover um cliente.");
+        if(error.response.data.errors!== undefined){
+          error.response.data.errors.forEach((erro) => {
+            notifyError(erro.defaultMessage);
+          });
+        }else{
+          notifyError(error.response.data.message);
+        }
       });
     setOpenModal(false);
   }
@@ -42,6 +51,14 @@ export default function ListProduto() {
   function carregarLista() {
     axios.get("http://localhost:8080/api/produto").then((response) => {
       setLista(response.data);
+    }).catch((error) => {
+      if(error.response.data.errors!== undefined){
+        error.response.data.errors.forEach((erro) => {
+          notifyError(erro.defaultMessage);
+        });
+      }else{
+        notifyError(error.response.data.message);
+      }
     });
   }
   
@@ -74,6 +91,7 @@ export default function ListProduto() {
                   <Table.HeaderCell>codigo</Table.HeaderCell>
                   <Table.HeaderCell>titulo</Table.HeaderCell>
                   <Table.HeaderCell>descricao</Table.HeaderCell>
+                  <Table.HeaderCell>categoria</Table.HeaderCell>
                   <Table.HeaderCell>valor Unitario</Table.HeaderCell>
                   <Table.HeaderCell>tempo de Entrega Minimo</Table.HeaderCell>
                   <Table.HeaderCell>tempo de Entrega Maximo</Table.HeaderCell>
@@ -87,6 +105,7 @@ export default function ListProduto() {
                     <Table.Cell>{Produto.codigo}</Table.Cell>
                     <Table.Cell>{Produto.titulo}</Table.Cell>
                     <Table.Cell>{Produto.descricao}</Table.Cell>
+                    <Table.Cell>{Produto.categoria?Produto.categoria.descricao:""}</Table.Cell>
                     <Table.Cell>{Produto.valorUnitario}</Table.Cell>
                     <Table.Cell>{Produto.tempoEntregaMinimo}</Table.Cell>
                     <Table.Cell>{Produto.tempoEntregaMaximo}</Table.Cell>

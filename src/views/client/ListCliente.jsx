@@ -5,12 +5,14 @@ import {
   Button,
   Container,
   Divider,
+  Form,
   Header,
   Icon,
   Modal,
   Table,
 } from "semantic-ui-react";
 import MenuSistema from "../../MenuSistema";
+import { notifyError, notifySuccess } from "../util/util";
 
 export default function ListCliente() {
   const [lista, setLista] = useState([]);
@@ -18,23 +20,132 @@ export default function ListCliente() {
   const [idRemover, setIdRemover] = useState();
   const [Cliente, setCliente] = useState();
   const [modelVer, setModelVer] = useState(false);
+  const [modelEndereco, setModelEndereco] = useState(false);
+  const [endereco, setEndereco] = useState();
+  const [editando, setEditando] = useState(false);
+  async function enviarEndereco() {
+    const enderecoRequest = {
+      rua: endereco.rua,
+      numero: endereco.numero,
+      complemento: endereco.complemento,
+      bairro: endereco.bairro,
+      cidade: endereco.cidade,
+      estado: endereco.estado,
+      cep: endereco.cep,
+      clienteId: endereco.clienteId,
+    };
+    if (editando) {
+      axios
+        .put(
+          "http://localhost:8080/api/cliente/endereco/" + endereco.id,
+          enderecoRequest
+        )
+        .then((response) => {
+          console.log(response.data);
+          notifySuccess("Endereço atualizado com sucesso.");
+          setModelEndereco(false);
+          setEditando(false);
+          carregarLista()
+        })
+        .catch((error) => {
+          if(error.response.data.errors!== undefined){
+            error.response.data.errors.forEach((erro) => {
+              notifyError(erro.defaultMessage);
+            });
+          }else{
+            notifyError(error.response.data.message);
+          }
+        })
+    } else {
+      setEditando(false);
+      axios
+        .post(
+          "http://localhost:8080/api/cliente/endereco/" + endereco.clienteId,
+          enderecoRequest
+        )
+        .then((response) => {
+          console.log(response.data);
+          notifySuccess("Endereço adicionado com sucesso.");
+          setModelEndereco(false);
+          carregarLista()
+        })
+        .catch((error) => {
+          if(error.response.data.errors!== undefined){
+            error.response.data.errors.forEach((erro) => {
+              notifyError(erro.defaultMessage);
+            });
+          }else{
+            notifyError(error.response.data.message);
+          }
+        })
+    }
+  }
   function confirmaVer(Cliente) {
     setModelVer(true);
     setCliente(Cliente);
+  }
+  async function apagarEndereco(id) {
+    await axios
+      .delete("http://localhost:8080/api/cliente/endereco/" + id)
+      .then((response) => {
+        console.log("Endereço removido com sucesso.");
+        notifySuccess("Endereço removido com sucesso.");
+        carregarLista();
+        setModelVer(false);
+        axios.get("http://localhost:8080/api/cliente").then((response) => {
+          setLista(response.data);
+        }).catch((error) => {
+          if(error.response.data.errors!== undefined){
+            error.response.data.errors.forEach((erro) => {
+              notifyError(erro.defaultMessage);
+            });
+          }else{
+            notifyError(error.response.data.message);
+          }
+        });
+      })
+      .catch((error) => {
+        if(error.response.data.errors!== undefined){
+          error.response.data.errors.forEach((erro) => {
+            notifyError(erro.defaultMessage);
+          });
+        }else{
+          notifyError(error.response.data.message);
+        }
+      });
+  }
+  async function editar(endereco) {
+    setEndereco(endereco);
+    setEditando(true);
+    setModelEndereco(true);
   }
   async function remover() {
     await axios
       .delete("http://localhost:8080/api/cliente/" + idRemover)
       .then((response) => {
         console.log("Cliente removido com sucesso.");
-
+        notifySuccess("Cliente removido com sucesso.");
         axios.get("http://localhost:8080/api/cliente").then((response) => {
           setLista(response.data);
+        }).catch((error) => {
+          if(error.response.data.errors!== undefined){
+            error.response.data.errors.forEach((erro) => {
+              notifyError(erro.defaultMessage);
+            });
+          }else{
+            notifyError(error.response.data.message);
+          }
         });
       })
       .catch((error) => {
-        console.log("Erro ao remover um cliente.");
-      });
+        if(error.response.data.errors!== undefined){
+          error.response.data.errors.forEach((erro) => {
+            notifyError(erro.defaultMessage);
+          });
+        }else{
+          notifyError(error.response.data.message);
+        }
+      })
     setOpenModal(false);
   }
 
@@ -50,6 +161,15 @@ export default function ListCliente() {
   function carregarLista() {
     axios.get("http://localhost:8080/api/cliente").then((response) => {
       setLista(response.data);
+      
+    }).catch((error) => {
+      if(error.response.data.errors!== undefined){
+        error.response.data.errors.forEach((erro) => {
+          notifyError(erro.defaultMessage);
+        });
+      }else{
+        notifyError(error.response.data.message);
+      }
     });
   }
   function formatarData(dataParam) {
@@ -149,6 +269,20 @@ export default function ListCliente() {
                       >
                         <Icon name="trash" />
                       </Button>
+                      &nbsp;
+                      <Button
+                        inverted
+                        circular
+                        color="blue"
+                        title="Adicionar Endereço"
+                        icon
+                        onClick={(e) => {
+                          setModelEndereco(true);
+                          setEndereco({ clienteId: cliente.id });
+                        }}
+                      >
+                        <Icon name="map marker alternate" />
+                      </Button>
                     </Table.Cell>
                   </Table.Row>
                 ))}
@@ -222,10 +356,189 @@ export default function ListCliente() {
             <strong>Fone Fixo: </strong>
             {Cliente?.foneFixo}
           </p>
+          <p>
+            <strong>Endereços: </strong>
+            {Cliente?.enderecos?.map((endereco, key) => (
+              <div>
+                <h5>Endereço {key + 1}</h5>
+                <div>
+                  <strong>Rua: </strong>
+                  {endereco.rua}
+                </div>
+                <div>
+                  <strong>Número: </strong>
+                  {endereco.numero}
+                </div>
+                <div>
+                  <strong>Complemento: </strong>
+                  {endereco.complemento}
+                </div>
+                <div>
+                  <strong>Bairro: </strong>
+                  {endereco.bairro}
+                </div>
+                <div>
+                  <strong>Cidade: </strong>
+                  {endereco.cidade}
+                </div>
+                <div>
+                  <strong>Estado: </strong>
+                  {endereco.estado}
+                </div>
+                <div>
+                  <strong>CEP: </strong>
+                  {endereco.cep}
+                </div>
+                <div>
+                <Button
+                    inverted
+                    circular
+                    color="red"
+                    title="Clique aqui para apagar os dados deste endereço"
+                    icon
+                    onClick={() => {
+                      apagarEndereco(endereco.id);
+                    }}
+                  >
+                    {" "}
+                    <Icon name="remove" /> apagar
+                  </Button>
+                  <Button
+                    inverted
+                    circular
+                    color="green"
+                    title="Clique aqui para editar os dados deste endereço"
+                    icon
+                    onClick={() => {
+                      editar(endereco);
+                    }}
+                  >
+                    {" "}
+                    <Icon name="edit" /> editar
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </p>
         </div>
         <Modal.Actions>
           <Button color="green" inverted onClick={() => setModelVer(false)}>
             <Icon name="remove" /> Fechar
+          </Button>
+        </Modal.Actions>
+      </Modal>
+
+      <Modal
+        basic
+        onClose={() => setModelEndereco(false)}
+        onOpen={() => setModelEndereco(true)}
+        open={modelEndereco}
+      >
+        <Header icon>
+          <div style={{ marginTop: "5%" }}> Endereço </div>
+        </Header>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            backgroundColor: "white",
+            color: "black",
+          }}
+        >
+          <Form>
+            <Form.Group>
+              <Form.Input
+                width={8}
+                fluid
+                label="Rua"
+                type="text"
+                value={endereco?.rua}
+                placeholder="Informe a rua"
+                onChange={(e) =>
+                  setEndereco({ ...endereco, rua: e.target.value })
+                }
+              />
+              <Form.Input
+                width={8}
+                fluid
+                label="Número"
+                type="text"
+                value={endereco?.numero}
+                placeholder="Informe o número"
+                onChange={(e) =>
+                  setEndereco({ ...endereco, numero: e.target.value })
+                }
+              />
+            </Form.Group>
+            <Form.Group>
+              <Form.Input
+                width={8}
+                fluid
+                label="Complemento"
+                type="text"
+                value={endereco?.complemento}
+                placeholder="Informe o complemento"
+                onChange={(e) =>
+                  setEndereco({ ...endereco, complemento: e.target.value })
+                }
+              />
+              <Form.Input
+                width={8}
+                fluid
+                label="Bairro"
+                type="text"
+                value={endereco?.bairro}
+                placeholder="Informe o bairro"
+                onChange={(e) =>
+                  setEndereco({ ...endereco, bairro: e.target.value })
+                }
+              />
+            </Form.Group>
+            <Form.Group>
+              <Form.Input
+                width={8}
+                fluid
+                label="Cidade"
+                type="text"
+                value={endereco?.cidade}
+                placeholder="Informe a cidade"
+                onChange={(e) =>
+                  setEndereco({ ...endereco, cidade: e.target.value })
+                }
+              />
+              <Form.Input
+                width={8}
+                fluid
+                label="Estado"
+                type="text"
+                value={endereco?.estado}
+                placeholder="Informe o estado"
+                onChange={(e) =>
+                  setEndereco({ ...endereco, estado: e.target.value })
+                }
+              />
+            </Form.Group>
+            <Form.Group>
+              <Form.Input
+                width={16}
+                fluid
+                label="CEP"
+                type="text"
+                value={endereco?.cep}
+                placeholder="Informe o CEP"
+                onChange={(e) =>
+                  setEndereco({ ...endereco, cep: e.target.value })
+                }
+              />
+            </Form.Group>
+          </Form>
+        </div>
+        <Modal.Actions>
+          <Button color="red" inverted onClick={() => setModelEndereco(false)}>
+            <Icon name="remove" /> Fechar
+          </Button>
+          <Button color="green" inverted onClick={() => enviarEndereco()}>
+            <Icon name="checkmark" /> {!editando?"Adicionar Endereço":"Atualizar Endereço"}
           </Button>
         </Modal.Actions>
       </Modal>
