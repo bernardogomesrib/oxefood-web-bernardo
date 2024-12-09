@@ -4,6 +4,7 @@ import InputMask from "react-input-mask";
 import { useLocation } from "react-router-dom";
 import { Button, Container, Divider, Form, Icon } from "semantic-ui-react";
 import MenuSistema from "../../MenuSistema";
+import { setupAxiosInterceptors } from "../util/AuthenticationService";
 import { notifyError, notifySuccess } from "../util/util";
 
 export default function FormEntregador() {
@@ -52,7 +53,7 @@ export default function FormEntregador() {
   const [cep, setCep] = React.useState("");
   const [uf, setUf] = React.useState("");
   const [complemento, setComplemento] = React.useState("");
-  const [entregadorId,setEntregadorId] = React.useState();
+  const [entregadorId,setEntregadorId] = React.useState(null);
   const { state } = useLocation();
 
   React.useEffect(() => {
@@ -94,7 +95,9 @@ export default function FormEntregador() {
   }, [state]);
 
 
-
+  React.useEffect(()=>{
+    setupAxiosInterceptors();
+  },[]);
 
 
 
@@ -141,12 +144,14 @@ export default function FormEntregador() {
           notifySuccess("Entregador cadastrado com sucesso.");
         })
         .catch((error) => {
-          if(error.response.data.errors!== undefined){
-            error.response.data.errors.forEach((erro) => {
-              notifyError(erro.defaultMessage);
-            });
-          }else{
-            notifyError(error.response.data.message);
+          if (error.response.data.errors !== undefined) {
+            for (let i = 0; i < error.response.data.errors.length; i++) {
+              notifyError(error.response.data.errors[i].defaultMessage);
+            }
+          } else {
+            console.log(error);
+            console.log(entregadorRequest);
+            notifyError(error.response.data);
           }
         });
 

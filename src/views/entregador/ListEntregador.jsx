@@ -3,12 +3,14 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Button, Container, Divider, Header, Icon, Modal, Table } from "semantic-ui-react";
 import MenuSistema from "../../MenuSistema";
+import { setupAxiosInterceptors } from "../util/AuthenticationService";
 import { notifyError, notifySuccess } from "../util/util";
 
 export default function ListEntregador() {
   const [lista, setLista] = useState([]);
   useEffect(() => {
     carregarLista();
+    setupAxiosInterceptors()
   }, []);
 
   const [openModal, setOpenModal] = useState(false);

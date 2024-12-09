@@ -12,6 +12,7 @@ import {
   Table,
 } from "semantic-ui-react";
 import MenuSistema from "../../MenuSistema";
+import { setupAxiosInterceptors } from "../util/AuthenticationService";
 import { notifyError, notifySuccess } from "../util/util";
 
 export default function ListCliente() {
@@ -156,6 +157,7 @@ export default function ListCliente() {
 
   useEffect(() => {
     carregarLista();
+    setupAxiosInterceptors();
   }, []);
 
   function carregarLista() {

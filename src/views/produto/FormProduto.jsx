@@ -11,6 +11,7 @@ import {
   Modal,
 } from "semantic-ui-react";
 import MenuSistema from "../../MenuSistema";
+import { setupAxiosInterceptors } from "../util/AuthenticationService";
 import { notifyError, notifySuccess } from "../util/util";
 
 export default function FormProduto() {
@@ -26,6 +27,7 @@ export default function FormProduto() {
   const [modalCategoria, setModalCategoria] = React.useState(false);
   const [cat, setCat] = React.useState("");
   const { state } = useLocation();
+  
   const getCategorias = async () => {
     axios
       .get("http://localhost:8080/api/produto/categoria")
@@ -48,6 +50,7 @@ export default function FormProduto() {
   };
   React.useEffect(() => {
     getCategorias();
+    setupAxiosInterceptors();
     if (state != null && state.id != null) {
       axios
         .get("http://localhost:8080/api/produto/" + state.id)
@@ -108,13 +111,13 @@ export default function FormProduto() {
           notifySuccess("Produto cadastrado com sucesso.");
         })
         .catch((error) => {
-          console.log(error);
           if (error.response.data.errors !== undefined) {
-            error.response.data.errors.forEach((erro) => {
-              notifyError(erro.defaultMessage);
-            });
+            for (let i = 0; i < error.response.data.errors.length; i++) {
+              notifyError(error.response.data.errors[i].defaultMessage);
+            }
           } else {
-            notifyError(error.response.data.message);
+            console.log(error);
+            notifyError(error.response.data);
           }
         });
     }
@@ -320,7 +323,10 @@ export default function FormProduto() {
                 })
                 .catch((error) => {
                   console.log(error);
-                  if (error.response.data?.errors !== undefined||error.response.data?.errors ===null) {
+                  if (
+                    error.response.data?.errors !== undefined ||
+                    error.response.data?.errors === null
+                  ) {
                     error.response.data.errors.forEach((erro) => {
                       notifyError(erro.defaultMessage);
                     });

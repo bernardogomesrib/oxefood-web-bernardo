@@ -4,6 +4,7 @@ import InputMask from "react-input-mask";
 import { useLocation } from "react-router-dom";
 import { Button, Container, Divider, Form, Icon } from "semantic-ui-react";
 import MenuSistema from "../../MenuSistema";
+import { setupAxiosInterceptors } from "../util/AuthenticationService";
 import { notifyError, notifySuccess } from "../util/util";
 
 export default function FormConfiguracaoSistema() {
@@ -18,7 +19,9 @@ export default function FormConfiguracaoSistema() {
   const [configuracaoSistemaId, setConfiguracaoSistemaId] =
     React.useState(null);
   const { state } = useLocation();
-
+  React.useEffect(()=>{
+    setupAxiosInterceptors();
+  },[]);
   React.useEffect(() => {
     if (state != null && state.id != null) {
       axios
@@ -50,6 +53,7 @@ export default function FormConfiguracaoSistema() {
       dataEntradaSistema,
       configuracaoSistemaId,
     };
+    
     if (configuracaoSistemaId !== null) {
       axios
         .put(
@@ -62,6 +66,7 @@ export default function FormConfiguracaoSistema() {
           notifySuccess("Empresa alterada com sucesso.");
         })
         .catch((error) => {
+          console.log(error);
           if(error.response.data.errors!== undefined){
             error.response.data.errors.forEach((erro) => {
               notifyError(erro.defaultMessage);

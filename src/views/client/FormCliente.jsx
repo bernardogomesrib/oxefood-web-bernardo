@@ -4,6 +4,7 @@ import InputMask from "react-input-mask";
 import { useLocation } from "react-router-dom";
 import { Button, Container, Divider, Form, Icon } from "semantic-ui-react";
 import MenuSistema from "../../MenuSistema";
+import { setupAxiosInterceptors } from "../util/AuthenticationService";
 import { notifyError, notifySuccess } from "../util/util";
 
 export default function FormCliente() {
@@ -15,7 +16,9 @@ export default function FormCliente() {
   const { state } = useLocation();
   const [idCliente, setIdCliente] = React.useState();
   //const [error, setError] = React.useState();
-  
+  React.useEffect(()=>{
+    setupAxiosInterceptors();
+  },[]);
   React.useEffect(() => {
     if (state != null && state.id != null) {
       axios
@@ -41,6 +44,7 @@ export default function FormCliente() {
   }, [state]);
 
   const salvarCliente = () => {
+    setupAxiosInterceptors();
     console.log("Nome: ", nome);
     console.log("CPF: ", cpf);
     console.log("Fone Celular: ", foneCelular);
