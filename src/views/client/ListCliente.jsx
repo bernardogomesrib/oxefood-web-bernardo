@@ -8,7 +8,9 @@ import {
   Form,
   Header,
   Icon,
+  Menu,
   Modal,
+  Segment,
   Table,
 } from "semantic-ui-react";
 import MenuSistema from "../../MenuSistema";
@@ -24,6 +26,13 @@ export default function ListCliente() {
   const [modelEndereco, setModelEndereco] = useState(false);
   const [endereco, setEndereco] = useState();
   const [editando, setEditando] = useState(false);
+
+
+  const [menuFiltro, setMenuFiltro] = useState(false);
+  const [nome, setNome] = useState("");
+  const [cpf, setCpf] = useState("");
+
+
   async function enviarEndereco() {
     const enderecoRequest = {
       rua: endereco.rua,
@@ -160,6 +169,35 @@ export default function ListCliente() {
     setupAxiosInterceptors();
   }, []);
 
+
+  const handleCpf= (value)=>{
+    filtrarClientes(value, nome);
+  }
+  const handleNome =(value)=>{
+    filtrarClientes(cpf, value);
+  }
+  async function filtrarClientes(cpf, nome) {
+    let formData = new FormData();
+
+    if (cpf !== undefined) {
+        setCpf(cpf)
+        formData.append('cpf', cpf);
+    }
+    if (nome !== undefined) {
+        setNome(nome)
+        formData.append('nome', nome);
+    }
+    
+
+    await axios.post("http://localhost:8080/api/cliente/filtrar", formData)
+    .then((response) => {
+        setLista(response.data)
+    })
+}
+
+  
+
+
   function carregarLista() {
     axios.get("http://localhost:8080/api/cliente").then((response) => {
       setLista(response.data);
@@ -204,7 +242,44 @@ export default function ListCliente() {
               as={Link}
               to="/form-cliente"
             />
+            <Menu compact>
+              <Menu.Item
+                name="menuFiltro"
+                active={menuFiltro === true}
+                onClick={() => setMenuFiltro(!menuFiltro)}
+              >
+                <Icon name="filter" />
+                Filtrar
+              </Menu.Item>
+            </Menu>
 
+            {menuFiltro ? (
+              <Segment>
+                <Form className="form-filtros">
+                  <Form.Input
+                    icon="search"
+                    value={nome}
+                    onChange={(e) => handleNome(e.target.value)}
+                    label="Nome de cliente"
+                    placeholder="Filtrar por Nome de cliente"
+                    labelPosition="left"
+                    width={4}
+                  />
+                  <Form.Group widths="equal">
+                    <Form.Input
+                      icon="search"
+                      value={cpf}
+                      onChange={(e) => handleCpf(e.target.value)}
+                      label="CPF"
+                      placeholder="Filtrar por CPF"
+                      labelPosition="left"
+                    />
+                  </Form.Group>
+                </Form>
+              </Segment>
+            ) : (
+              ""
+            )}
             <br />
             <br />
             <br />

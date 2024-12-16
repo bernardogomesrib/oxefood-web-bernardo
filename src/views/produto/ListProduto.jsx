@@ -1,7 +1,18 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Button, Container, Divider, Header, Icon, Modal, Table } from "semantic-ui-react";
+import {
+  Button,
+  Container,
+  Divider,
+  Form,
+  Header,
+  Icon,
+  Menu,
+  Modal,
+  Segment,
+  Table,
+} from "semantic-ui-react";
 import MenuSistema from "../../MenuSistema";
 import { setupAxiosInterceptors } from "../util/AuthenticationService";
 import { notifyError, notifySuccess } from "../util/util";
@@ -12,14 +23,46 @@ export default function ListProduto() {
   useEffect(() => {
     carregarLista();
     setupAxiosInterceptors();
+    carregarCategorias();
   }, []);
   const [openModal, setOpenModal] = useState(false);
   const [idRemover, setIdRemover] = useState();
-  const [produto,setProduto]= useState();
-  const [modelVer,setModelVer]= useState(false);
-  function confirmaVer(produto){
-      setModelVer(true);
-      setProduto(produto);
+  const [produto, setProduto] = useState();
+  const [modelVer, setModelVer] = useState(false);
+
+  const [menuFiltro, setMenuFiltro] = useState();
+  const [codigo, setCodigo] = useState();
+  const [titulo, setTitulo] = useState();
+  const [idCategoria, setIdCategoria] = useState();
+  const [listaCategoriaProduto, setListaCategoriaProduto] = useState([]);
+
+  function confirmaVer(produto) {
+    setModelVer(true);
+    setProduto(produto);
+  }
+
+  async function carregarCategorias() {
+    axios
+      .get("http://localhost:8080/api/produto/categoria")
+      .then((response) => {
+        const dropDownCategorias = [];
+        dropDownCategorias.push({ text: "", value: "" });
+        response.data.map((c) =>
+          dropDownCategorias.push({ text: c.descricao, value: c.id })
+        );
+        console.log(dropDownCategorias);
+        setListaCategoriaProduto(dropDownCategorias);
+      })
+      .catch((error) => {
+        console.log("Erro ao carregar as categorias.");
+        if (error.response.data.errors !== undefined) {
+          error.response.data.errors.forEach((erro) => {
+            notifyError(erro.defaultMessage);
+          });
+        } else {
+          notifyError(error.response.data.message);
+        }
+      });
   }
 
   async function remover() {
@@ -35,11 +78,11 @@ export default function ListProduto() {
       })
       .catch((error) => {
         console.log("Erro ao remover um cliente.");
-        if(error.response.data.errors!== undefined){
+        if (error.response.data.errors !== undefined) {
           error.response.data.errors.forEach((erro) => {
             notifyError(erro.defaultMessage);
           });
-        }else{
+        } else {
           notifyError(error.response.data.message);
         }
       });
@@ -51,19 +94,65 @@ export default function ListProduto() {
     setIdRemover(id);
   }
   function carregarLista() {
-    axios.get("http://localhost:8080/api/produto").then((response) => {
-      setLista(response.data);
-    }).catch((error) => {
-      if(error.response.data.errors!== undefined){
-        error.response.data.errors.forEach((erro) => {
-          notifyError(erro.defaultMessage);
-        });
-      }else{
-        notifyError(error.response.data.message);
-      }
-    });
+    axios
+      .get("http://localhost:8080/api/produto")
+      .then((response) => {
+        setLista(response.data);
+      })
+      .catch((error) => {
+        if (error.response.data.errors !== undefined) {
+          error.response.data.errors.forEach((erro) => {
+            notifyError(erro.defaultMessage);
+          });
+        } else {
+          notifyError(error.response.data.message);
+        }
+      });
   }
-  
+
+  function handleMenuFiltro() {
+    if (menuFiltro === true) {
+      setMenuFiltro(false);
+    } else {
+      setMenuFiltro(true);
+    }
+  }
+
+  function handleChangeCodigo(value) {
+    filtrarProdutos(value, titulo, idCategoria);
+  }
+
+  function handleChangeTitulo(value) {
+    filtrarProdutos(codigo, value, idCategoria);
+  }
+
+  function handleChangeCategoriaProduto(value) {
+    filtrarProdutos(codigo, titulo, value);
+  }
+
+  async function filtrarProdutos(codigoParam, tituloParam, idCategoriaParam) {
+    let formData = new FormData();
+
+    if (codigoParam !== undefined) {
+      setCodigo(codigoParam);
+      formData.append("codigo", codigoParam);
+    }
+    if (tituloParam !== undefined) {
+      setTitulo(tituloParam);
+      formData.append("titulo", tituloParam);
+    }
+    if (idCategoriaParam !== undefined) {
+      setIdCategoria(idCategoriaParam);
+      formData.append("idCategoria", idCategoriaParam);
+    }
+
+    await axios
+      .post("http://localhost:8080/api/produto/filtrar", formData)
+      .then((response) => {
+        setLista(response.data);
+      });
+  }
+
   return (
     <div>
       <MenuSistema tela={"Produtos"} />
@@ -82,6 +171,53 @@ export default function ListProduto() {
               as={Link}
               to="/form-produto"
             />
+            <Menu compact>
+              <Menu.Item
+                name="menuFiltro"
+                active={menuFiltro === true}
+                onClick={() => handleMenuFiltro()}
+              >
+                <Icon name="filter" />
+                Filtrar
+              </Menu.Item>
+            </Menu>
+
+            {menuFiltro ? (
+              <Segment>
+                <Form className="form-filtros">
+                  <Form.Input
+                    icon="search"
+                    value={codigo}
+                    onChange={(e) => handleChangeCodigo(e.target.value)}
+                    label="Código do Produto"
+                    placeholder="Filtrar por Código do Produto"
+                    labelPosition="left"
+                    width={4}
+                  />
+                  <Form.Group widths="equal">
+                    <Form.Input
+                      icon="search"
+                      value={titulo}
+                      onChange={(e) => handleChangeTitulo(e.target.value)}
+                      label="Título"
+                      placeholder="Filtrar por título"
+                      labelPosition="left"
+                    />
+                    <Form.Select
+                      placeholder="Filtrar por Categoria"
+                      label="Categoria"
+                      options={listaCategoriaProduto}
+                      value={idCategoria}
+                      onChange={(e, { value }) => {
+                        handleChangeCategoriaProduto(value);
+                      }}
+                    />
+                  </Form.Group>
+                </Form>
+              </Segment>
+            ) : (
+              ""
+            )}
 
             <br />
             <br />
@@ -107,7 +243,9 @@ export default function ListProduto() {
                     <Table.Cell>{Produto.codigo}</Table.Cell>
                     <Table.Cell>{Produto.titulo}</Table.Cell>
                     <Table.Cell>{Produto.descricao}</Table.Cell>
-                    <Table.Cell>{Produto.categoria?Produto.categoria.descricao:""}</Table.Cell>
+                    <Table.Cell>
+                      {Produto.categoria ? Produto.categoria.descricao : ""}
+                    </Table.Cell>
                     <Table.Cell>{Produto.valorUnitario}</Table.Cell>
                     <Table.Cell>{Produto.tempoEntregaMinimo}</Table.Cell>
                     <Table.Cell>{Produto.tempoEntregaMaximo}</Table.Cell>
@@ -118,18 +256,18 @@ export default function ListProduto() {
                         style={{ color: "green" }}
                         asChild
                       >
-                    <Button
-                        inverted
-                        circular
-                        color="green"
-                        title="Clique aqui para editar os dados deste produto"
-                        icon
-                      >
+                        <Button
+                          inverted
+                          circular
+                          color="green"
+                          title="Clique aqui para editar os dados deste produto"
+                          icon
+                        >
                           {" "}
                           <Icon name="edit" />{" "}
-                      </Button>{" "}
-                        </Link>
-                        &nbsp;
+                        </Button>{" "}
+                      </Link>
+                      &nbsp;
                       <Button
                         inverted
                         circular
@@ -138,7 +276,6 @@ export default function ListProduto() {
                         icon
                         onClick={(e) => confirmaVer(Produto)}
                       >
-                        
                         <Icon name="eye" />
                       </Button>
                       &nbsp;
@@ -150,7 +287,6 @@ export default function ListProduto() {
                         icon
                         onClick={(e) => confirmaRemover(Produto.id)}
                       >
-                        
                         <Icon name="trash" />
                       </Button>
                     </Table.Cell>
@@ -189,7 +325,6 @@ export default function ListProduto() {
         </Modal.Actions>
       </Modal>
 
-
       <Modal
         basic
         onClose={() => setModelVer(false)}
@@ -197,32 +332,47 @@ export default function ListProduto() {
         open={modelVer}
       >
         <Header icon>
-          
-          <div style={{ marginTop: "5%"}}>
-            {" "}
-                
-                Produto
-                
-            {" "}
-          </div>
+          <div style={{ marginTop: "5%" }}> Produto </div>
         </Header>
-        <div style={{display:'flex',flexDirection:'column',backgroundColor:'white',color:'black'}}>
-                <p style={{marginBottom:3}}><strong>Código: </strong>{produto?.codigo}</p>
-                <p style={{marginBottom:3}}><strong>Título: </strong>{produto?.titulo}</p>
-                <p style={{marginBottom:3}}><strong>Descrição: </strong>{produto?.descricao}</p>
-                <p style={{marginBottom:3}}><strong>Valor Unitário: </strong>{produto?.valorUnitario}</p>
-                <p style={{marginBottom:3}}><strong>Tempo de Entrega Mínimo: </strong>{produto?.tempoEntregaMinimo}</p>
-                <p style={{marginBottom:3}}><strong>Tempo de Entrega Máximo: </strong>{produto?.tempoEntregaMaximo}</p>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            backgroundColor: "white",
+            color: "black",
+          }}
+        >
+          <p style={{ marginBottom: 3 }}>
+            <strong>Código: </strong>
+            {produto?.codigo}
+          </p>
+          <p style={{ marginBottom: 3 }}>
+            <strong>Título: </strong>
+            {produto?.titulo}
+          </p>
+          <p style={{ marginBottom: 3 }}>
+            <strong>Descrição: </strong>
+            {produto?.descricao}
+          </p>
+          <p style={{ marginBottom: 3 }}>
+            <strong>Valor Unitário: </strong>
+            {produto?.valorUnitario}
+          </p>
+          <p style={{ marginBottom: 3 }}>
+            <strong>Tempo de Entrega Mínimo: </strong>
+            {produto?.tempoEntregaMinimo}
+          </p>
+          <p style={{ marginBottom: 3 }}>
+            <strong>Tempo de Entrega Máximo: </strong>
+            {produto?.tempoEntregaMaximo}
+          </p>
         </div>
         <Modal.Actions>
-        
           <Button color="green" inverted onClick={() => setModelVer(false)}>
             <Icon name="remove" /> Fechar
           </Button>
         </Modal.Actions>
       </Modal>
-
-
     </div>
   );
 }

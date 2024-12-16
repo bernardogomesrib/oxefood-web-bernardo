@@ -2,7 +2,7 @@ import axios from "axios";
 import React from "react";
 import InputMask from "react-input-mask";
 import { useLocation } from "react-router-dom";
-import { Button, Container, Divider, Form, Icon } from "semantic-ui-react";
+import { Button, Container, Divider, Form, FormGroup, Icon } from "semantic-ui-react";
 import MenuSistema from "../../MenuSistema";
 import { setupAxiosInterceptors } from "../util/AuthenticationService";
 import { notifyError, notifySuccess } from "../util/util";
@@ -15,6 +15,8 @@ export default function FormCliente() {
   const [dataNascimento, setDataNascimento] = React.useState("");
   const { state } = useLocation();
   const [idCliente, setIdCliente] = React.useState();
+  const [email, setEmail] = React.useState();
+  const [senha, setSenha] = React.useState();
   //const [error, setError] = React.useState();
   React.useEffect(()=>{
     setupAxiosInterceptors();
@@ -56,6 +58,8 @@ export default function FormCliente() {
       foneCelular: foneCelular,
       foneFixo: foneFixo,
       dataNascimento: dataNascimento,
+      email: email,
+      password: senha
     };
     if (idCliente != null) {
       axios
@@ -176,6 +180,20 @@ export default function FormCliente() {
                   />
                 </Form.Input>
               </Form.Group>
+              <FormGroup>
+                <Form.Input fluid label="email"
+                value = {email}
+                onChange={(e)=> setEmail(e.target.value)}
+                type="email"
+                width={8}
+                />
+                <Form.Input flueid label="senha"
+                value ={senha}
+                onChange={(e)=> setSenha(e.target.value)}
+                type="password"
+                width={8}
+                />
+              </FormGroup>
             </Form>
 
             <div style={{ marginTop: "4%" }}>
